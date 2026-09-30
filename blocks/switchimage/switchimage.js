@@ -21,6 +21,21 @@ function setActive(block, index) {
   });
 }
 
+function buildHeader(cells) {
+  const header = document.createElement('div');
+  header.className = 'switchimage-header';
+  cells.forEach((cell, i) => {
+    if (cell.querySelector('h1, h2, h3, h4, h5, h6')) {
+      header.append(...cell.childNodes);
+      return;
+    }
+    const el = document.createElement(i === 0 ? 'h2' : 'p');
+    el.textContent = cell.textContent.trim();
+    header.append(el);
+  });
+  return header.children.length ? header : null;
+}
+
 /**
  * switchimage – migrated from the AEM "switchimage" component.
  * Desktop (>= 992px): tabs switch the large image above them.
@@ -30,23 +45,28 @@ function setActive(block, index) {
  *
  * | switchimage                    |                    |                     |
  * | ------------------------------ | ------------------ | ------------------- |
+ * | Container title                | Container          |                     |
+ * | (e.g. "Benefits")              | description        |                     |
  * | Item title (tab / accordion    | Desktop image      | Mobile image        |
  * | label, plain text)             | (1440 x 545)       | (768 x 400)         |
  * | ...one row per item...         |                    |                     |
  *
- * - First row: block name only ("switchimage").
- * - Column 1 – Title (required): text shown on the tab and accordion button.
- *   AEM dialog: ./stainTitle
- * - Column 2 – Desktop image (required): large image shown above the tabs.
- *   Its alt text is used for accessibility. AEM dialog: ./desktopImagePath
- * - Column 3 – Mobile image (optional): image shown inside the open accordion
- *   item on mobile/tablet; falls back to the desktop image when empty.
- *   AEM dialog: ./mobileImagePath
- * - Add or remove rows to change the number of items; the first item is active.
- *
- * The container title (./containerTitle) and description (./containerDesc) are
- * authored as a normal heading and paragraph above the block. To center them,
- * add a Section Metadata table to the section with: Style | centered
+ * - Row 1: block name only ("switchimage").
+ * - Row 2 – Header (optional, no images): shown centered above the block.
+ *   - Column 1 – Container title, rendered as an h2 (a heading authored
+ *     here keeps its level). AEM dialog: ./containerTitle
+ *   - Column 2 – Container description, rendered as a paragraph.
+ *     AEM dialog: ./containerDesc
+ *   - Both may also be authored in a single cell (heading + paragraph).
+ * - Rows 3+ – Items (one row per tab / accordion item):
+ *   - Column 1 – Title (required): text shown on the tab and accordion
+ *     button. AEM dialog: ./stainTitle
+ *   - Column 2 – Desktop image (required): large image shown above the tabs.
+ *     Its alt text is used for accessibility. AEM dialog: ./desktopImagePath
+ *   - Column 3 – Mobile image (optional): image shown inside the open
+ *     accordion item on mobile/tablet; falls back to the desktop image.
+ *     AEM dialog: ./mobileImagePath
+ *   - Add or remove rows to change the number of items; the first is active.
  *
  * @param {Element} block
  */
@@ -58,6 +78,13 @@ export default function decorate(block) {
   tabs.className = 'switchimage-tabs';
 
   const rows = [...block.children].filter((row) => row.textContent.trim() || row.querySelector('picture'));
+
+  // optional header row: first row without images -> title + description
+  let header;
+  if (rows[0] && !rows[0].querySelector('picture')) {
+    const cells = [...rows.shift().children].filter((cell) => cell.textContent.trim());
+    header = buildHeader(cells);
+  }
 
   rows.forEach((row, index) => {
     const cells = [...row.children];
@@ -98,7 +125,7 @@ export default function decorate(block) {
     tabs.append(item);
   });
 
-  block.replaceChildren(stage, tabs);
+  block.replaceChildren(...(header ? [header] : []), stage, tabs);
   if (rows.length) setActive(block, 0);
 
   // keep image stage accessible only where it is visible

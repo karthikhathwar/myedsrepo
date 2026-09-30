@@ -3,8 +3,23 @@
   --switchimage-shadow: 0 2px 5px 0 #dfdfdf;
   --switchimage-tab-bg: #f8f8f8;
   --switchimage-divider: #e5dede;
+}
 
-  margin-top: 30px;
+/* header: container title + description */
+.switchimage .switchimage-header {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.switchimage .switchimage-header > :is(h1, h2, h3, h4, h5, h6) {
+  margin: 0 0 10px;
+  line-height: 1.2;
+}
+
+.switchimage .switchimage-header > p {
+  margin: 0;
+  line-height: 19px;
+  letter-spacing: 0.54px;
 }
 
 /* desktop image stage – hidden on mobile/tablet */
