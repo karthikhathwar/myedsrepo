@@ -192,10 +192,16 @@
   outline-offset: -4px;
 }
 
-/* desktop */
+/* desktop: 1440px wide like the original, breaking out of a narrower section
+   column (centered); 32px keeps it clear of the viewport edge and scrollbar */
 @media (width >= 992px) {
   .lookbookcarousel {
     --lookbookcarousel-inset: 4%;
+    --lookbookcarousel-width: min(1440px, 100vw - 32px);
+
+    width: var(--lookbookcarousel-width);
+    max-width: none;
+    margin-inline: calc((100% - var(--lookbookcarousel-width)) / 2);
   }
 
   .lookbookcarousel .lookbookcarousel-title {
@@ -235,7 +241,7 @@
   }
 
   .lookbookcarousel .lookbookcarousel-colour-code {
-    margin-top: 0;
+    margin-top: 7px;
   }
 
   .lookbookcarousel.is-scrollable .lookbookcarousel-nav {
