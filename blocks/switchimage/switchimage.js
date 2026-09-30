@@ -76,10 +76,7 @@ export default function decorate(block) {
     const label = document.createElement('span');
     label.className = 'switchimage-label';
     label.textContent = titleCell ? titleCell.textContent.trim() : '';
-    const icon = document.createElement('span');
-    icon.className = 'switchimage-icon';
-    icon.setAttribute('aria-hidden', 'true');
-    button.append(label, icon);
+    button.append(label);
     button.addEventListener('click', () => setActive(block, index));
     item.append(button);
 
