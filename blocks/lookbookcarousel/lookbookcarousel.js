@@ -33,26 +33,42 @@ function buildHeader(cells) {
   return header.children.length ? header : null;
 }
 
+const URL_TEXT = /^(https?:\/\/|\/)\S+$/i;
+
 /**
  * Parses one "colour applied" list item:
- *   [Name](link), Code, #HEX      – or a swatch image instead of #HEX
+ *   Name, Code, #HEX, URL        – URL is its own part (plain text or a link)
+ * A swatch image can replace #HEX. The older form "[Name](URL), Code, #HEX"
+ * (name linked to the shade page) is still supported.
  */
 function parseColour(li) {
-  const link = li.querySelector('a');
   const swatchImg = li.querySelector('img');
   let rest = li.textContent;
   let name = '';
-  if (link) {
-    name = link.textContent.trim();
-    rest = rest.replace(link.textContent, '');
-  }
+  let url = '';
+
+  [...li.querySelectorAll('a')].forEach((a) => {
+    const text = a.textContent.trim();
+    if (URL_TEXT.test(text)) {
+      url = url || a.href;
+      rest = rest.replace(a.textContent, '');
+    } else if (text && !name) {
+      // legacy: linked name
+      name = text;
+      url = url || a.href;
+      rest = rest.replace(a.textContent, '');
+    }
+  });
+
   const parts = rest.split(/[,|]/).map((part) => part.trim()).filter(Boolean);
+  const urlPart = parts.find((part) => URL_TEXT.test(part));
+  if (urlPart && !url) url = new URL(urlPart, window.location.href).href;
   const colour = parts.find((part) => HEX.test(part));
-  const others = parts.filter((part) => part !== colour);
+  const others = parts.filter((part) => part !== colour && part !== urlPart);
   if (!name) name = others.shift() || '';
   const code = others.join(' ');
   return {
-    name, code, colour, url: link?.href, swatch: swatchImg?.src,
+    name, code, colour, url, swatch: swatchImg?.src,
   };
 }
 
@@ -227,11 +243,16 @@ function setupNav(block, track, slides) {
  *   - Column 1 – Image (required): the room image, landscape (about 3:2).
  *     Its alt text is used for accessibility. AEM: lookbookImageModel
  *   - Column 2 – Colours applied (optional): a bulleted list, one colour
- *     per bullet, written as:  Name, Code, #HEX
- *     e.g. "Valley Flower, 8530, #E3CCAE" with the name linked to the shade
- *     page. For textures/products, put a small swatch image in the bullet
- *     instead of the #HEX value. AEM: coloursApplied (productName,
- *     productCode, bgColour / swatchImagePath, productUrl)
+ *     per bullet, four parts separated by commas:
+ *       Name, Code, #HEX, URL
+ *     e.g. "Valley Flower, 8530, #E3CCAE,
+ *           https://www.asianpaints.com/colour-catalogue/brown-wall-colours/valley-flower.html"
+ *     - Name: shade name (AEM: productName)
+ *     - Code: shade code (AEM: productCode)
+ *     - #HEX: swatch colour (AEM: bgColour). For textures/products, put a
+ *       small swatch image in the bullet instead (AEM: swatchImagePath).
+ *     - URL: page the swatch opens when clicked (AEM: productUrl). Plain
+ *       text or a link; leave it out for a non-clickable swatch.
  *   - Column 3 – Image description (optional): short text shown above the
  *     colours. AEM: imageDescription
  * - Add or remove slide rows to change the number of slides.
