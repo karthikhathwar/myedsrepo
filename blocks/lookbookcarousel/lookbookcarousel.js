@@ -107,11 +107,13 @@ function buildSlide(row) {
   return slide;
 }
 
+// copies stay clickable (shade links work on partly visible slides) but are
+// hidden from assistive tech and skipped in the tab order
 function makeClone(slide) {
   const clone = slide.cloneNode(true);
   clone.classList.add('is-clone');
   clone.setAttribute('aria-hidden', 'true');
-  clone.inert = true;
+  clone.querySelectorAll('a, button').forEach((node) => node.setAttribute('tabindex', '-1'));
   return clone;
 }
 

@@ -32,20 +32,21 @@
   letter-spacing: 0.5px;
 }
 
-/* carousel – on mobile the track bleeds past the section padding to the right screen edge */
+/* carousel – on mobile the track bleeds past the section padding to the right screen edge.
+   The inset sits outside the scroll area so no neighbouring slide peeks in on the left. */
 .lookbookcarousel .lookbookcarousel-viewport {
   position: relative;
   margin-top: 24px;
   margin-right: -24px;
+  padding-left: var(--lookbookcarousel-inset);
 }
 
 .lookbookcarousel .lookbookcarousel-track {
   display: flex;
   gap: 10px;
   margin: 0;
-  padding: 0 0 0 var(--lookbookcarousel-inset);
+  padding: 0;
   overflow-x: auto;
-  scroll-padding-left: var(--lookbookcarousel-inset);
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   list-style: none;
@@ -57,7 +58,7 @@
 
 .lookbookcarousel .lookbookcarousel-slide {
   flex: 0 0 300px;
-  max-width: calc(100% - 2 * var(--lookbookcarousel-inset));
+  max-width: 100%;
   scroll-snap-align: start;
 }
 
