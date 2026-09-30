@@ -2,13 +2,6 @@ import { createOptimizedPicture } from '../../scripts/aem.js';
 
 const DEFAULT_FEATURES_LABEL = 'Key features';
 const DEFAULT_CTA_LABEL = 'View product';
-const DEFAULT_PRODUCT_TYPE = 'products';
-
-const WISHLIST_KEYS = {
-  sku: 'sku',
-  'product id': 'productId',
-  'product type': 'productType',
-};
 
 function optimize(picture) {
   const img = picture?.querySelector('img');
@@ -29,24 +22,6 @@ const isLinkCell = (cell) => {
   const a = cell.querySelector('a');
   return a && a.textContent.trim() === cell.textContent.trim();
 };
-
-const isWishlistCell = (cell) => /^\s*(sku|product id|product type)\s*:/i.test(cell.textContent);
-
-// reads "Key: value" lines (one paragraph or line break per entry)
-function readWishlist(cell) {
-  const data = { productType: DEFAULT_PRODUCT_TYPE };
-  if (!cell) return data;
-  const paras = [...cell.querySelectorAll('p')];
-  const lines = paras.length
-    ? paras.map((para) => para.textContent)
-    : cell.innerHTML.split(/<br\s*\/?>/i).map((line) => line.replace(/<[^>]*>/g, ''));
-  lines.forEach((line) => {
-    const [, key, value] = line.match(/^\s*([^:]+):\s*(.*)$/) || [];
-    const prop = WISHLIST_KEYS[key?.trim().toLowerCase()];
-    if (prop && value.trim()) data[prop] = value.trim();
-  });
-  return data;
-}
 
 function buildHeader(cells) {
   const header = el('div', 'similarproducts-header');
@@ -70,9 +45,8 @@ function buildCard(row) {
   const imageCell = cells.find((cell) => cell.querySelector('picture'));
   const featuresCell = cells.find((cell) => cell.querySelector('ul, ol'));
   const linkCell = cells.find((cell) => cell !== imageCell && isLinkCell(cell));
-  const wishlistCell = cells.find(isWishlistCell);
   const [nameCell, subtitleCell, descCell] = cells
-    .filter((cell) => ![imageCell, featuresCell, linkCell, wishlistCell].includes(cell));
+    .filter((cell) => ![imageCell, featuresCell, linkCell].includes(cell));
 
   const name = nameCell?.textContent.trim() || '';
   const card = el('li', 'similarproducts-card');
@@ -81,25 +55,13 @@ function buildCard(row) {
   fav.type = 'button';
   fav.setAttribute('aria-pressed', 'false');
   fav.setAttribute('aria-label', `Add ${name} to favourites`);
-  // same data-attr-* contract as the AEM wishlist markup
-  const wishlist = readWishlist(wishlistCell);
-  fav.dataset.attrTitle = name;
-  fav.dataset.attrAction = 'like';
-  fav.dataset.attrType = wishlist.productType;
-  if (wishlist.sku) fav.dataset.attrSku = wishlist.sku;
-  if (wishlist.productId) fav.dataset.attrProductId = wishlist.productId;
   fav.addEventListener('click', () => {
     const pressed = fav.getAttribute('aria-pressed') !== 'true';
     fav.setAttribute('aria-pressed', pressed);
     // hook for wishlist integrations
     card.dispatchEvent(new CustomEvent('similarproducts:favourite', {
       bubbles: true,
-      detail: {
-        ...wishlist,
-        name,
-        favourite: pressed,
-        url: linkCell?.querySelector('a')?.href,
-      },
+      detail: { name, favourite: pressed, url: linkCell?.querySelector('a')?.href },
     }));
   });
 
@@ -182,11 +144,11 @@ function setupNav(block, track) {
  *
  * Authoring (DA table):
  *
- * | similarproducts |           |          |       |          |       |          |
- * | --------------- | --------- | -------- | ----- | -------- | ----- | -------- |
- * | Section title   | View all  |          |       |          |       |          |
- * | Image           | Name      | Subtitle | Desc. | Features | Link  | Wishlist |
- * | ...one row per product...                                                   |
+ * | similarproducts |              |              |              |               |              |
+ * | --------------- | ------------ | ------------ | ------------ | ------------- | ------------ |
+ * | Section title   | View all link|              |              |               |              |
+ * | Product image   | Product name | Subtitle     | Description  | Key features  | Product link |
+ * | ...one row per product...                                                                   |
  *
  * - Row 1: block name only ("similarproducts").
  * - Row 2 – Header (optional, no image):
@@ -207,21 +169,13 @@ function setupNav(block, track) {
  *   - Column 6 – Product link (required): link to the product page; the link
  *     text is the button label, e.g. "VIEW PRODUCT" (defaults to "View product").
  *     AEM dialog: ./prodctatitle (label)
- *   - Column 7 – Wishlist data (optional): one "Key: value" line (paragraph)
- *     per entry, used by the favourite (heart) button:
- *       SKU: 0029              -> data-attr-sku (AEM dialog: ./skuCode)
- *       Product ID: 12345      -> data-attr-product-id
- *       Product Type: products -> data-attr-type (defaults to "products")
- *     Leave a value empty to omit it. data-attr-title (product name) and
- *     data-attr-action ("like") are set automatically.
  * - Add or remove product rows to change the number of cards.
  *
  * Put the block in a section with Section Metadata "Style | light" for the
  * grey background used on the original page.
  *
  * The heart button toggles aria-pressed and fires a bubbling
- * "similarproducts:favourite" event
- * ({ sku, productId, productType, name, favourite, url }) for wishlist
+ * "similarproducts:favourite" event ({ name, favourite, url }) for wishlist
  * integrations.
  *
  * @param {Element} block
