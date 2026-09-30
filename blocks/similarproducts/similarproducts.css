@@ -6,6 +6,13 @@
   --similarproducts-underline: #5e25b2;
   --similarproducts-fav: #c0526b;
   --similarproducts-gap: 16px;
+
+  /* self-contained container (original: 1280px, centered) so the header
+     doesn't hug the viewport edges when the section isn't constrained */
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
 }
 
 /* header: title + view all */
