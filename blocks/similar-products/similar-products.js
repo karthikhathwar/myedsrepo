@@ -1,7 +1,6 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
-import removeLabelRows from '../../scripts/block-labels.js';
 
-// author label rows in the DA table (see scripts/block-labels.js)
+// author label rows in the DA table; removed before rendering
 const LABELS = [
   'Section title',
   'View all link',
@@ -12,6 +11,16 @@ const LABELS = [
   'Key features',
   'Product link',
 ];
+
+function removeLabelRows(block, labels) {
+  const norm = (t) => t.replace(/\s*\([^)]*\)\s*$/, '').replace(/\s+/g, ' ').trim().toLowerCase();
+  const known = new Set(labels.map(norm));
+  [...block.children].forEach((row) => {
+    if (row.querySelector('picture, img')) return;
+    const texts = [...row.children].map((cell) => cell.textContent.trim()).filter(Boolean);
+    if (texts.length && texts.every((t) => known.has(norm(t)))) row.remove();
+  });
+}
 
 const DEFAULT_FEATURES_LABEL = 'Key features';
 const DEFAULT_CTA_LABEL = 'View product';
@@ -37,17 +46,17 @@ const isLinkCell = (cell) => {
 };
 
 function buildHeader(cells) {
-  const header = el('div', 'similarproducts-header');
+  const header = el('div', 'similar-products-header');
   cells.forEach((cell) => {
     if (isLinkCell(cell)) {
       const link = cell.querySelector('a');
-      link.className = 'similarproducts-viewall';
+      link.className = 'similar-products-viewall';
       header.append(link);
       return;
     }
     const heading = cell.querySelector('h1, h2, h3, h4, h5, h6')
       || el('h2', '', cell.textContent.trim());
-    heading.classList.add('similarproducts-title');
+    heading.classList.add('similar-products-title');
     header.prepend(heading);
   });
   return header.children.length ? header : null;
@@ -62,9 +71,9 @@ function buildCard(row) {
     .filter((cell) => ![imageCell, featuresCell, linkCell].includes(cell));
 
   const name = nameCell?.textContent.trim() || '';
-  const card = el('li', 'similarproducts-card');
+  const card = el('li', 'similar-products-card');
 
-  const fav = el('button', 'similarproducts-fav');
+  const fav = el('button', 'similar-products-fav');
   fav.type = 'button';
   fav.setAttribute('aria-pressed', 'false');
   fav.setAttribute('aria-label', `Add ${name} to favourites`);
@@ -72,38 +81,38 @@ function buildCard(row) {
     const pressed = fav.getAttribute('aria-pressed') !== 'true';
     fav.setAttribute('aria-pressed', pressed);
     // hook for wishlist integrations
-    card.dispatchEvent(new CustomEvent('similarproducts:favourite', {
+    card.dispatchEvent(new CustomEvent('similar-products:favourite', {
       bubbles: true,
       detail: { name, favourite: pressed, url: linkCell?.querySelector('a')?.href },
     }));
   });
 
   // static face: image + name (desktop, before hover)
-  const face = el('div', 'similarproducts-face');
+  const face = el('div', 'similar-products-face');
   const picture = optimize(imageCell?.querySelector('picture'));
   if (picture) {
-    const media = el('div', 'similarproducts-media');
+    const media = el('div', 'similar-products-media');
     media.append(picture);
     face.append(media);
   }
-  const faceName = el('p', 'similarproducts-face-name', name);
+  const faceName = el('p', 'similar-products-face-name', name);
   faceName.setAttribute('aria-hidden', 'true');
   face.append(faceName);
 
   // details: revealed on hover/focus on desktop, always visible on mobile
-  const details = el('div', 'similarproducts-details');
-  details.append(el('h3', 'similarproducts-name', name));
+  const details = el('div', 'similar-products-details');
+  details.append(el('h3', 'similar-products-name', name));
   const subtitle = subtitleCell?.textContent.trim();
-  if (subtitle) details.append(el('p', 'similarproducts-subtitle', subtitle));
+  if (subtitle) details.append(el('p', 'similar-products-subtitle', subtitle));
   const desc = descCell?.textContent.trim();
-  if (desc) details.append(el('p', 'similarproducts-desc', desc));
+  if (desc) details.append(el('p', 'similar-products-desc', desc));
 
   const list = featuresCell?.querySelector('ul, ol');
   if (list) {
-    const features = el('div', 'similarproducts-features');
+    const features = el('div', 'similar-products-features');
     const label = [...featuresCell.children]
       .find((child) => child !== list && child.textContent.trim())?.textContent.trim();
-    features.append(el('p', 'similarproducts-features-label', label || DEFAULT_FEATURES_LABEL));
+    features.append(el('p', 'similar-products-features-label', label || DEFAULT_FEATURES_LABEL));
     const ul = el('ul');
     [...list.children].forEach((li) => ul.append(el('li', '', li.textContent.trim())));
     features.append(ul);
@@ -112,7 +121,7 @@ function buildCard(row) {
 
   const link = linkCell?.querySelector('a');
   if (link) {
-    const cta = el('a', 'similarproducts-cta');
+    const cta = el('a', 'similar-products-cta');
     cta.href = link.href;
     const text = link.textContent.trim();
     cta.textContent = !text || text === link.href ? DEFAULT_CTA_LABEL : text;
@@ -125,16 +134,16 @@ function buildCard(row) {
 }
 
 function setupNav(block, track) {
-  const nav = el('div', 'similarproducts-nav');
-  const prev = el('button', 'similarproducts-prev');
-  const next = el('button', 'similarproducts-next');
+  const nav = el('div', 'similar-products-nav');
+  const prev = el('button', 'similar-products-prev');
+  const next = el('button', 'similar-products-next');
   prev.type = 'button';
   next.type = 'button';
   prev.setAttribute('aria-label', 'Previous products');
   next.setAttribute('aria-label', 'Next products');
   nav.append(prev, next);
 
-  const step = () => track.querySelector('.similarproducts-card')?.getBoundingClientRect().width || 0;
+  const step = () => track.querySelector('.similar-products-card')?.getBoundingClientRect().width || 0;
   prev.addEventListener('click', () => track.scrollBy({ left: -step(), behavior: 'smooth' }));
   next.addEventListener('click', () => track.scrollBy({ left: step(), behavior: 'smooth' }));
 
@@ -150,7 +159,7 @@ function setupNav(block, track) {
 }
 
 /**
- * similarproducts – migrated from the AEM "similarproduct" component.
+ * similar-products – migrated from the AEM "similarproduct" component.
  * Desktop (>= 992px): cards show image + name; details slide up on hover/focus.
  * Mobile/tablet (< 992px): details always visible (image beside key features).
  * Cards scroll horizontally (3 per view desktop, 2 tablet, 1 + peek mobile).
@@ -159,13 +168,13 @@ function setupNav(block, track) {
  * Label rows (the LABELS above, e.g. "Section title") may sit above any row
  * to guide authors; they are removed before rendering.
  *
- * | similarproducts |              |              |              |               |              |
+ * | similar-products |              |              |              |               |              |
  * | --------------- | ------------ | ------------ | ------------ | ------------- | ------------ |
  * | Section title   | View all link|              |              |               |              |
  * | Product image   | Product name | Subtitle     | Description  | Key features  | Product link |
  * | ...one row per product...                                                                   |
  *
- * - Row 1: block name only ("similarproducts").
+ * - Row 1: block name only ("similar-products").
  * - Row 2 – Header (optional, no image):
  *   - Column 1 – Section title, rendered as an h2 (e.g. "Similar products").
  *     AEM dialog: ./similarTitle
@@ -190,7 +199,7 @@ function setupNav(block, track) {
  * grey background used on the original page.
  *
  * The heart button toggles aria-pressed and fires a bubbling
- * "similarproducts:favourite" event ({ name, favourite, url }) for wishlist
+ * "similar-products:favourite" event ({ name, favourite, url }) for wishlist
  * integrations.
  *
  * @param {Element} block
@@ -204,11 +213,11 @@ export default function decorate(block) {
     header = buildHeader([...rows.shift().children].filter((cell) => cell.textContent.trim()));
   }
 
-  const track = el('ul', 'similarproducts-track');
-  track.setAttribute('aria-label', header?.querySelector('.similarproducts-title')?.textContent || 'Products');
+  const track = el('ul', 'similar-products-track');
+  track.setAttribute('aria-label', header?.querySelector('.similar-products-title')?.textContent || 'Products');
   rows.forEach((row) => track.append(buildCard(row)));
 
-  const viewport = el('div', 'similarproducts-viewport');
+  const viewport = el('div', 'similar-products-viewport');
   viewport.append(track);
 
   block.replaceChildren(...(header ? [header] : []), viewport);

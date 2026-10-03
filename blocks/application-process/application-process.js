@@ -1,7 +1,6 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
-import removeLabelRows from '../../scripts/block-labels.js';
 
-// author label rows in the DA table (see scripts/block-labels.js)
+// author label rows in the DA table; removed before rendering
 const LABELS = [
   'Section title',
   'Product image',
@@ -11,6 +10,16 @@ const LABELS = [
   'Coats',
   'Product URL',
 ];
+
+function removeLabelRows(block, labels) {
+  const norm = (t) => t.replace(/\s*\([^)]*\)\s*$/, '').replace(/\s+/g, ' ').trim().toLowerCase();
+  const known = new Set(labels.map(norm));
+  [...block.children].forEach((row) => {
+    if (row.querySelector('picture, img')) return;
+    const texts = [...row.children].map((cell) => cell.textContent.trim()).filter(Boolean);
+    if (texts.length && texts.every((t) => known.has(norm(t)))) row.remove();
+  });
+}
 
 const URL_TEXT = /^(https?:\/\/|\/)\S+$/i;
 
@@ -42,7 +51,7 @@ function buildHeader(cells) {
   if (!cell) return null;
   const heading = cell.querySelector('h1, h2, h3, h4, h5, h6')
     || el('h2', '', cell.textContent.trim());
-  heading.classList.add('applicationprocess-title');
+  heading.classList.add('application-process-title');
   return heading;
 }
 
@@ -60,20 +69,20 @@ function buildStep(row, index) {
   const coats = text(coatsCell);
   const url = linkCell ? urlOf(linkCell) : '';
 
-  const item = el('li', 'applicationprocess-step');
+  const item = el('li', 'application-process-step');
 
-  const top = el('div', 'applicationprocess-top');
-  top.append(el('p', 'applicationprocess-label', step));
-  if (type) top.append(el('h3', 'applicationprocess-type', type));
+  const top = el('div', 'application-process-top');
+  top.append(el('p', 'application-process-label', step));
+  if (type) top.append(el('h3', 'application-process-type', type));
 
   // grey circle with the product image (linked to the product page)
-  const media = el('div', 'applicationprocess-media');
+  const media = el('div', 'application-process-media');
   const picture = optimize(imageCell?.querySelector('picture'));
   if (picture) {
     const img = picture.querySelector('img');
     if (img && (!img.alt || img.alt === 'Product Image') && name) img.alt = name;
     if (url) {
-      const a = el('a', 'applicationprocess-link');
+      const a = el('a', 'application-process-link');
       a.href = url;
       a.target = '_blank';
       a.rel = 'noopener';
@@ -85,16 +94,16 @@ function buildStep(row, index) {
     }
   }
 
-  const info = el('div', 'applicationprocess-info');
-  if (name) info.append(el('p', 'applicationprocess-name', name));
-  if (coats) info.append(el('p', 'applicationprocess-coats', coats));
+  const info = el('div', 'application-process-info');
+  if (name) info.append(el('p', 'application-process-name', name));
+  if (coats) info.append(el('p', 'application-process-coats', coats));
 
   item.append(top, media, info);
   return item;
 }
 
 /**
- * applicationprocess – migrated from the AEM "applicationProc" component
+ * application-process – migrated from the AEM "applicationProc" component
  * ("How to apply"): a heading and numbered steps, each with a product image in
  * a grey circle (linked to the product page), product name and number of coats.
  * Desktop/tablet (>= 768px): steps side by side.
@@ -104,13 +113,13 @@ function buildStep(row, index) {
  * Label rows (the LABELS above, e.g. "Section title") may sit above any row
  * to guide authors; they are removed before rendering.
  *
- * | applicationprocess |        |        |               |        |              |
+ * | application-process |        |        |               |        |              |
  * | ------------------ | ------ | ------ | ------------- | ------ | ------------ |
  * | Section title      |        |        |               |        |              |
  * | Image              | Step   | Type   | Product name  | Coats  | Product URL  |
  * | ...one row per step...                                                       |
  *
- * - Row 1: block name only ("applicationprocess").
+ * - Row 1: block name only ("application-process").
  * - Row 2 – Header (optional, no image): section title, rendered as an h2,
  *   e.g. "How to apply". AEM: title
  * - Rows 3+ – Steps (one row per step, in order):
@@ -138,7 +147,7 @@ export default function decorate(block) {
     header = buildHeader([...rows.shift().children]);
   }
 
-  const list = el('ol', 'applicationprocess-steps');
+  const list = el('ol', 'application-process-steps');
   rows.forEach((row, i) => list.append(buildStep(row, i)));
 
   block.replaceChildren(...(header ? [header] : []), list);

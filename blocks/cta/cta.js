@@ -1,32 +1,9 @@
-import {
-  initKeycloak,
-  hasLoginCallback,
-  isKeycloakAuthenticated,
-  showLogin,
-} from '../../scripts/keycloak.js';
-
 const OPTION_RESTRICTED = /\b(restricted|login(\s+required)?)\b/i;
 const OPTION_NEW_TAB = /\bnew\s*tab\b/i;
 
-// post-login redirect contract of the asianpaints.com login script
-const REDIRECT_PATH_KEY = 'redirectPostLoginPath';
-const REDIRECT_FLAG_KEY = 'redirectPostLoginFlag';
-
-const storage = {
-  get: (key) => { try { return localStorage.getItem(key); } catch { return null; } },
-  set: (key, value) => { try { localStorage.setItem(key, value); } catch { /* unavailable */ } },
-  remove: (key) => { try { localStorage.removeItem(key); } catch { /* unavailable */ } },
-};
-
-// same-origin targets are stored as a path (like AEM), others as full URL
-const toStoredPath = (href) => {
-  const url = new URL(href, window.location.href);
-  return url.origin === window.location.origin ? `${url.pathname}${url.search}` : url.href;
-};
-
 /**
  * Opens the file in a new tab. If the browser blocks the tab (no click to
- * open it from, e.g. right after login), a "ready" link is shown instead.
+ * open it from), a "ready" link is shown instead.
  */
 function openInNewTab(href, block) {
   // no 'noopener' feature: it makes window.open return null even on success
@@ -50,40 +27,22 @@ function openInNewTab(href, block) {
 
 /**
  * Login-gated link (AEM data-attr-isrestricted): signed-in visitors get the
- * file in a new tab; others go to the Keycloak login, and the file opens in a
- * new tab after they return.
+ * file in a new tab; others sign in through the header's login and are then
+ * taken to the file.
  */
 function gate(link, block) {
   link.dataset.restricted = 'true';
   link.addEventListener('click', async (e) => {
     e.preventDefault();
-    storage.set(REDIRECT_PATH_KEY, toStoredPath(link.href));
-    storage.set(REDIRECT_FLAG_KEY, 'true');
-
-    if (isKeycloakAuthenticated()) {
+    try {
+      const { isUserLoggedIn, startLogin } = await import('../header/header.js');
+      if (isUserLoggedIn()) openInNewTab(link.href, block);
+      else await startLogin(link.href);
+    } catch {
+      // login unavailable: don't leave a dead button
       openInNewTab(link.href, block);
-      return;
     }
-    const keycloak = await initKeycloak();
-    if (!keycloak) {
-      // login unavailable (script blocked or offline): don't leave a dead button
-      openInNewTab(link.href, block);
-      return;
-    }
-    if (isKeycloakAuthenticated()) openInNewTab(link.href, block);
-    else showLogin();
   });
-}
-
-/** after returning from Keycloak: open the file the visitor asked for */
-async function handlePostLogin(block) {
-  if (storage.get(REDIRECT_FLAG_KEY) !== 'true' || !hasLoginCallback()) return;
-  await initKeycloak();
-  if (!isKeycloakAuthenticated()) return;
-  const path = storage.get(REDIRECT_PATH_KEY);
-  storage.remove(REDIRECT_FLAG_KEY);
-  storage.remove(REDIRECT_PATH_KEY);
-  if (path) openInNewTab(new URL(path, window.location.origin).href, block);
 }
 
 function buildButton(row, block) {
@@ -131,12 +90,9 @@ function buildButton(row, block) {
  *     AEM: CTA title + link / restricted path
  *   - Column 2 – Options (optional), any of:
  *     - "Restricted": login required (AEM: isRestricted). Signed-in visitors
- *       get the file in a new tab; others are sent to the Asian Paints
- *       Keycloak login (scripts/keycloak.js, same showLogin() logic as AEM)
- *       with the path saved in localStorage (redirectPostLoginPath /
- *       redirectPostLoginFlag). After login they return to this page and the
- *       file opens in a new tab (or a "download ready" link appears if the
- *       browser blocks the tab). If the login script can't load, the file
+ *       get the file in a new tab; others are sent through the header's
+ *       Keycloak login (blocks/header/header.js) and, once signed in, the
+ *       header takes them to the file. If the login can't start, the file
  *       opens directly.
  *     - "New tab": open the link in a new tab.
  *
@@ -148,5 +104,4 @@ export default function decorate(block) {
   wrap.className = 'cta-buttons';
   wrap.append(...buttons);
   block.replaceChildren(wrap);
-  if (buttons.some((b) => b.dataset.restricted)) handlePostLogin(block);
 }

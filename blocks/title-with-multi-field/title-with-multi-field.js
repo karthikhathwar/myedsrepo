@@ -1,6 +1,4 @@
-import removeLabelRows from '../../scripts/block-labels.js';
-
-// author label rows in the DA table (see scripts/block-labels.js)
+// author label rows in the DA table; removed before rendering
 const LABELS = [
   'Section title',
   'Pack image',
@@ -9,6 +7,16 @@ const LABELS = [
   'Tax note',
   'Disclaimer',
 ];
+
+function removeLabelRows(block, labels) {
+  const norm = (t) => t.replace(/\s*\([^)]*\)\s*$/, '').replace(/\s+/g, ' ').trim().toLowerCase();
+  const known = new Set(labels.map(norm));
+  [...block.children].forEach((row) => {
+    if (row.querySelector('picture, img')) return;
+    const texts = [...row.children].map((cell) => cell.textContent.trim()).filter(Boolean);
+    if (texts.length && texts.every((t) => known.has(norm(t)))) row.remove();
+  });
+}
 
 export default function decorate(block) {
   removeLabelRows(block, LABELS);

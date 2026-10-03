@@ -1,7 +1,6 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
-import removeLabelRows from '../../scripts/block-labels.js';
 
-// author label rows in the DA table (see scripts/block-labels.js)
+// author label rows in the DA table; removed before rendering
 const LABELS = [
   'Section title',
   'Section description',
@@ -9,6 +8,16 @@ const LABELS = [
   'Desktop image',
   'Mobile image',
 ];
+
+function removeLabelRows(block, labels) {
+  const norm = (t) => t.replace(/\s*\([^)]*\)\s*$/, '').replace(/\s+/g, ' ').trim().toLowerCase();
+  const known = new Set(labels.map(norm));
+  [...block.children].forEach((row) => {
+    if (row.querySelector('picture, img')) return;
+    const texts = [...row.children].map((cell) => cell.textContent.trim()).filter(Boolean);
+    if (texts.length && texts.every((t) => known.has(norm(t)))) row.remove();
+  });
+}
 
 const DESKTOP_MQ = window.matchMedia('(width >= 992px)');
 
@@ -21,19 +30,19 @@ function optimize(picture, breakpoints) {
 }
 
 function setActive(block, index) {
-  block.querySelectorAll('.switchimage-item').forEach((item, i) => {
+  block.querySelectorAll('.switch-image-item').forEach((item, i) => {
     const active = i === index;
     item.classList.toggle('active', active);
-    item.querySelector('.switchimage-tab').setAttribute('aria-expanded', active);
+    item.querySelector('.switch-image-tab').setAttribute('aria-expanded', active);
   });
-  block.querySelectorAll('.switchimage-stage > picture').forEach((pic, i) => {
+  block.querySelectorAll('.switch-image-stage > picture').forEach((pic, i) => {
     pic.classList.toggle('active', i === index);
   });
 }
 
 function buildHeader(cells) {
   const header = document.createElement('div');
-  header.className = 'switchimage-header';
+  header.className = 'switch-image-header';
   cells.forEach((cell, i) => {
     if (cell.querySelector('h1, h2, h3, h4, h5, h6')) {
       header.append(...cell.childNodes);
@@ -47,7 +56,7 @@ function buildHeader(cells) {
 }
 
 /**
- * switchimage – migrated from the AEM "switchimage" component.
+ * switch-image – migrated from the AEM "switch-image" component.
  * Desktop (>= 992px): tabs switch the large image above them.
  * Mobile/tablet (< 992px): accordion, the open item shows its image inline.
  *
@@ -55,7 +64,7 @@ function buildHeader(cells) {
  * Label rows (the LABELS above, e.g. "Section title") may sit above any row
  * to guide authors; they are removed before rendering.
  *
- * | switchimage                    |                    |                     |
+ * | switch-image                    |                    |                     |
  * | ------------------------------ | ------------------ | ------------------- |
  * | Container title                | Container          |                     |
  * | (e.g. "Benefits")              | description        |                     |
@@ -63,7 +72,7 @@ function buildHeader(cells) {
  * | label, plain text)             | (1440 x 545)       | (768 x 400)         |
  * | ...one row per item...         |                    |                     |
  *
- * - Row 1: block name only ("switchimage").
+ * - Row 1: block name only ("switch-image").
  * - Row 2 – Header (optional, no images): shown centered above the block.
  *   - Column 1 – Container title, rendered as an h2 (a heading authored
  *     here keeps its level). AEM dialog: ./containerTitle
@@ -85,10 +94,10 @@ function buildHeader(cells) {
 export default function decorate(block) {
   removeLabelRows(block, LABELS);
   const stage = document.createElement('div');
-  stage.className = 'switchimage-stage';
+  stage.className = 'switch-image-stage';
 
   const tabs = document.createElement('div');
-  tabs.className = 'switchimage-tabs';
+  tabs.className = 'switch-image-tabs';
 
   const rows = [...block.children].filter((row) => row.textContent.trim() || row.querySelector('picture'));
 
@@ -104,17 +113,17 @@ export default function decorate(block) {
     const titleCell = cells.find((cell) => !cell.querySelector('picture') && cell.textContent.trim());
     const pictures = [...row.querySelectorAll('picture')];
     const [desktopPic, mobilePic = desktopPic] = pictures;
-    const id = `switchimage-${Math.random().toString(36).slice(2, 8)}-${index}`;
+    const id = `switch-image-${Math.random().toString(36).slice(2, 8)}-${index}`;
 
     const item = document.createElement('div');
-    item.className = 'switchimage-item';
+    item.className = 'switch-image-item';
 
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'switchimage-tab';
+    button.className = 'switch-image-tab';
     button.setAttribute('aria-controls', `${id}-mobile ${id}-desktop`);
     const label = document.createElement('span');
-    label.className = 'switchimage-label';
+    label.className = 'switch-image-label';
     label.textContent = titleCell ? titleCell.textContent.trim() : '';
     button.append(label);
     button.addEventListener('click', () => setActive(block, index));
@@ -123,7 +132,7 @@ export default function decorate(block) {
     const mobile = optimize(mobilePic, [{ width: '768' }]);
     if (mobile) {
       const panel = document.createElement('div');
-      panel.className = 'switchimage-mobile';
+      panel.className = 'switch-image-mobile';
       panel.id = `${id}-mobile`;
       panel.append(mobile);
       item.append(panel);

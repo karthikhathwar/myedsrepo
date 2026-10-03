@@ -1,21 +1,21 @@
-.applicationprocess {
-  --applicationprocess-text: #222;
-  --applicationprocess-circle: rgb(0 0 0 / 10%);
+.application-process {
+  --application-process-text: #222;
+  --application-process-circle: rgb(0 0 0 / 10%);
 
-  color: var(--applicationprocess-text);
+  color: var(--application-process-text);
   text-align: center;
 }
 
-.applicationprocess .applicationprocess-title {
+.application-process .application-process-title {
   margin: 0;
-  color: var(--applicationprocess-text);
+  color: var(--application-process-text);
   font-size: 22px;
   font-weight: 700;
   line-height: 24px;
 }
 
 /* steps – mobile: one per row, image and text alternate sides */
-.applicationprocess .applicationprocess-steps {
+.application-process .application-process-steps {
   display: flex;
   flex-direction: column;
   gap: 100px;
@@ -25,26 +25,26 @@
   list-style: none;
 }
 
-.applicationprocess .applicationprocess-step {
+.application-process .application-process-step {
   display: grid;
   grid-template: "media top" auto "media info" 1fr / 60% 1fr;
   text-align: left;
 }
 
-.applicationprocess .applicationprocess-step:nth-child(even) {
+.application-process .application-process-step:nth-child(even) {
   grid-template: "top media" auto "info media" 1fr / 1fr 140px;
 }
 
-.applicationprocess .applicationprocess-top {
+.application-process .application-process-top {
   grid-area: top;
 }
 
-.applicationprocess .applicationprocess-info {
+.application-process .application-process-info {
   grid-area: info;
   margin-top: 10px;
 }
 
-.applicationprocess .applicationprocess-label {
+.application-process .application-process-label {
   margin: 0;
   font-size: 12px;
   font-weight: 400;
@@ -53,9 +53,9 @@
   text-transform: uppercase;
 }
 
-.applicationprocess .applicationprocess-type {
+.application-process .application-process-type {
   margin: 0;
-  color: var(--applicationprocess-text);
+  color: var(--application-process-text);
   font-size: 14px;
   font-weight: 700;
   line-height: 22px;
@@ -63,7 +63,7 @@
   text-transform: uppercase;
 }
 
-.applicationprocess .applicationprocess-name {
+.application-process .application-process-name {
   margin: 0 0 10px;
   font-size: 14px;
   font-weight: 300;
@@ -72,7 +72,7 @@
   text-transform: capitalize;
 }
 
-.applicationprocess .applicationprocess-coats {
+.application-process .application-process-coats {
   margin: 0;
   font-size: 14px;
   font-weight: 700;
@@ -82,7 +82,7 @@
 }
 
 /* grey circle with the product image rising above it */
-.applicationprocess .applicationprocess-media {
+.application-process .application-process-media {
   display: flex;
   grid-area: media;
   justify-content: center;
@@ -91,43 +91,43 @@
   width: 140px;
   height: 140px;
   border-radius: 50%;
-  background-color: var(--applicationprocess-circle);
+  background-color: var(--application-process-circle);
 }
 
-.applicationprocess .applicationprocess-step:nth-child(even) .applicationprocess-media {
+.application-process .application-process-step:nth-child(even) .application-process-media {
   justify-self: end;
 }
 
-.applicationprocess .applicationprocess-media > a,
-.applicationprocess .applicationprocess-media > picture {
+.application-process .application-process-media > a,
+.application-process .application-process-media > picture {
   display: block;
   width: 80%;
   margin-top: -25px;
 }
 
-.applicationprocess .applicationprocess-media picture {
+.application-process .application-process-media picture {
   display: block;
 }
 
-.applicationprocess .applicationprocess-media img {
+.application-process .application-process-media img {
   display: block;
   width: 100%;
   height: auto;
 }
 
-.applicationprocess .applicationprocess-link:focus-visible {
+.application-process .application-process-link:focus-visible {
   outline: 1px solid currentcolor;
   outline-offset: 2px;
 }
 
 /* tablet & desktop: steps side by side, text above and inside the circle */
 @media (width >= 768px) {
-  .applicationprocess .applicationprocess-title {
+  .application-process .application-process-title {
     font-size: 30px;
     line-height: 34px;
   }
 
-  .applicationprocess .applicationprocess-steps {
+  .application-process .application-process-steps {
     flex-flow: row wrap;
     justify-content: space-evenly;
     gap: 40px 0;
@@ -135,8 +135,8 @@
     padding-bottom: 80px;
   }
 
-  .applicationprocess .applicationprocess-step,
-  .applicationprocess .applicationprocess-step:nth-child(even) {
+  .application-process .application-process-step,
+  .application-process .application-process-step:nth-child(even) {
     display: flex;
     flex: 0 1 22%;
     flex-direction: column;
@@ -145,58 +145,58 @@
     text-align: center;
   }
 
-  .applicationprocess .applicationprocess-top {
+  .application-process .application-process-top {
     padding-bottom: 70px;
   }
 
-  .applicationprocess .applicationprocess-label {
+  .application-process .application-process-label {
     margin-bottom: 5px;
     font-size: 13px;
   }
 
-  .applicationprocess .applicationprocess-media,
-  .applicationprocess .applicationprocess-step:nth-child(even) .applicationprocess-media {
+  .application-process .application-process-media,
+  .application-process .application-process-step:nth-child(even) .application-process-media {
     width: 100%;
     max-width: 230px;
     height: auto;
     aspect-ratio: 1;
   }
 
-  .applicationprocess .applicationprocess-media > a,
-  .applicationprocess .applicationprocess-media > picture {
+  .application-process .application-process-media > a,
+  .application-process .application-process-media > picture {
     width: 154px;
     max-width: 67%;
     margin-top: -60px;
   }
 
-  .applicationprocess .applicationprocess-media img {
+  .application-process .application-process-media img {
     max-height: 184px;
     object-fit: contain;
   }
 
   /* product name + coats sit in the lower part of the circle; shifted visually
      (layout space kept, like the original) so the circle never overlaps what follows */
-  .applicationprocess .applicationprocess-info {
+  .application-process .application-process-info {
     position: relative;
     top: -110px;
     margin-top: 10px;
     padding: 0 25px;
   }
 
-  .applicationprocess .applicationprocess-name {
+  .application-process .application-process-name {
     margin-bottom: 5px;
     padding: 0 19px;
   }
 
-  .applicationprocess .applicationprocess-coats {
+  .application-process .application-process-coats {
     line-height: normal;
     letter-spacing: 0.88px;
   }
 }
 
 @media (width >= 992px) {
-  .applicationprocess .applicationprocess-step,
-  .applicationprocess .applicationprocess-step:nth-child(even) {
+  .application-process .application-process-step,
+  .application-process .application-process-step:nth-child(even) {
     flex-basis: 230px;
   }
 }

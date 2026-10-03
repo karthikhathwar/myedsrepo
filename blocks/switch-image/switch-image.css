@@ -1,59 +1,59 @@
-.switchimage {
-  --switchimage-accent: #512b8b;
-  --switchimage-shadow: 0 2px 5px 0 #dfdfdf;
-  --switchimage-tab-bg: #f8f8f8;
-  --switchimage-divider: #e5dede;
+.switch-image {
+  --switch-image-accent: #512b8b;
+  --switch-image-shadow: 0 2px 5px 0 #dfdfdf;
+  --switch-image-tab-bg: #f8f8f8;
+  --switch-image-divider: #e5dede;
 }
 
 /* header: container title + description */
-.switchimage .switchimage-header {
+.switch-image .switch-image-header {
   margin-bottom: 30px;
   text-align: center;
 }
 
-.switchimage .switchimage-header > :is(h1, h2, h3, h4, h5, h6) {
+.switch-image .switch-image-header > :is(h1, h2, h3, h4, h5, h6) {
   margin: 0 0 10px;
   line-height: 1.2;
 }
 
-.switchimage .switchimage-header > p {
+.switch-image .switch-image-header > p {
   margin: 0;
   line-height: 19px;
   letter-spacing: 0.54px;
 }
 
 /* desktop image stage – hidden on mobile/tablet */
-.switchimage .switchimage-stage {
+.switch-image .switch-image-stage {
   display: none;
   overflow: hidden;
 }
 
-.switchimage .switchimage-stage > picture {
+.switch-image .switch-image-stage > picture {
   display: none;
 }
 
-.switchimage .switchimage-stage > picture.active {
+.switch-image .switch-image-stage > picture.active {
   display: block;
 }
 
-.switchimage .switchimage-stage img {
+.switch-image .switch-image-stage img {
   display: block;
   width: 100%;
   height: auto;
 }
 
 /* tabs / accordion items */
-.switchimage .switchimage-tabs {
+.switch-image .switch-image-tabs {
   display: block;
 }
 
-.switchimage .switchimage-item {
+.switch-image .switch-image-item {
   width: 100%;
   margin-bottom: 2px;
-  box-shadow: var(--switchimage-shadow);
+  box-shadow: var(--switch-image-shadow);
 }
 
-.switchimage .switchimage-tab {
+.switch-image .switch-image-tab {
   display: flex;
   align-items: center;
   width: 100%;
@@ -74,38 +74,38 @@
   cursor: pointer;
 }
 
-.switchimage .switchimage-tab:hover,
-.switchimage .switchimage-tab:focus {
+.switch-image .switch-image-tab:hover,
+.switch-image .switch-image-tab:focus {
   background-color: transparent;
   color: var(--text-color);
 }
 
-.switchimage .switchimage-tab:focus-visible {
-  outline: 2px solid var(--switchimage-accent);
+.switch-image .switch-image-tab:focus-visible {
+  outline: 2px solid var(--switch-image-accent);
   outline-offset: -2px;
 }
 
-.switchimage .switchimage-label {
+.switch-image .switch-image-label {
   flex: 1;
 }
 
-.switchimage .switchimage-item.active .switchimage-tab {
+.switch-image .switch-image-item.active .switch-image-tab {
   font-weight: 600;
 }
 
 /* inline image for mobile/tablet */
-.switchimage .switchimage-mobile {
+.switch-image .switch-image-mobile {
   display: none;
   height: 400px;
   overflow: hidden;
 }
 
-.switchimage .switchimage-item.active .switchimage-mobile {
+.switch-image .switch-image-item.active .switch-image-mobile {
   display: block;
 }
 
-.switchimage .switchimage-mobile picture,
-.switchimage .switchimage-mobile img {
+.switch-image .switch-image-mobile picture,
+.switch-image .switch-image-mobile img {
   display: block;
   width: 100%;
   height: 100%;
@@ -114,36 +114,36 @@
 
 /* desktop: image stage with tab row below */
 @media (width >= 992px) {
-  .switchimage .switchimage-stage {
+  .switch-image .switch-image-stage {
     display: block;
   }
 
-  .switchimage .switchimage-tabs {
+  .switch-image .switch-image-tabs {
     display: flex;
     justify-content: center;
-    box-shadow: var(--switchimage-shadow);
+    box-shadow: var(--switch-image-shadow);
   }
 
-  .switchimage .switchimage-item {
+  .switch-image .switch-image-item {
     flex: 1;
     margin-bottom: 0;
     padding: 15px;
-    border-right: 1px solid var(--switchimage-divider);
-    background-color: var(--switchimage-tab-bg);
+    border-right: 1px solid var(--switch-image-divider);
+    background-color: var(--switch-image-tab-bg);
     box-shadow: none;
   }
 
-  .switchimage .switchimage-item:last-child {
+  .switch-image .switch-image-item:last-child {
     border-right: 0;
   }
 
-  .switchimage .switchimage-item.active {
+  .switch-image .switch-image-item.active {
     padding: 15px 15px 13px;
-    border-bottom: 2px solid var(--switchimage-accent);
+    border-bottom: 2px solid var(--switch-image-accent);
     background-color: #fff;
   }
 
-  .switchimage .switchimage-tab {
+  .switch-image .switch-image-tab {
     justify-content: center;
     height: 60px;
     padding: 0 25px;
@@ -151,7 +151,7 @@
     text-align: center;
   }
 
-  .switchimage .switchimage-item.active .switchimage-mobile {
+  .switch-image .switch-image-item.active .switch-image-mobile {
     display: none;
   }
 }

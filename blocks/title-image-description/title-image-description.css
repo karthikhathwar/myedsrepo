@@ -1,0 +1,118 @@
+.title-image-description {
+  --title-image-description-text: #222;
+  --title-image-description-cta: #3b3b3b;
+  --title-image-description-underline: #5e25b2;
+
+  /* self-contained container (original: 1286px, centered) */
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1286px;
+  margin-inline: auto;
+  color: var(--title-image-description-text);
+}
+
+/* section title */
+.title-image-description .title-image-description-title {
+  margin: 0 0 20px;
+  color: var(--title-image-description-text);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+/* cards – mobile/tablet: stacked */
+.title-image-description .title-image-description-list {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.title-image-description .title-image-description-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.title-image-description .title-image-description-media {
+  width: 100%;
+}
+
+.title-image-description .title-image-description-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.title-image-description .title-image-description-name {
+  margin: 20px 0 0;
+  color: var(--title-image-description-text);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.title-image-description .title-image-description-desc p {
+  margin: 5px 0 10px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+  letter-spacing: 0.58px;
+}
+
+.title-image-description .title-image-description-cta {
+  padding-bottom: 2px;
+  border-bottom: 2px solid var(--title-image-description-underline);
+  color: var(--title-image-description-cta);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 12px;
+  letter-spacing: 1px;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.title-image-description .title-image-description-cta:hover {
+  color: var(--title-image-description-underline);
+  text-decoration: none;
+}
+
+.title-image-description .title-image-description-cta:focus-visible {
+  outline: 2px solid var(--title-image-description-underline);
+  outline-offset: 2px;
+}
+
+/* desktop: 2 cards per row */
+@media (width >= 992px) {
+  .title-image-description .title-image-description-title {
+    margin-bottom: 55px;
+    font-size: 30px;
+    line-height: 40px;
+  }
+
+  .title-image-description .title-image-description-list {
+    flex-flow: row wrap;
+    gap: 40px 4%;
+  }
+
+  .title-image-description .title-image-description-card {
+    flex: 0 1 48%;
+  }
+
+  .title-image-description .title-image-description-name {
+    font-size: 20px;
+    line-height: 40px;
+  }
+
+  .title-image-description .title-image-description-desc p {
+    margin: 5px 0 15px;
+    line-height: 24px;
+    letter-spacing: 0.54px;
+  }
+
+  .title-image-description .title-image-description-cta {
+    font-size: 13px;
+  }
+}

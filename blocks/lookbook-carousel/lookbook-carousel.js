@@ -1,7 +1,6 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
-import removeLabelRows from '../../scripts/block-labels.js';
 
-// author label rows in the DA table (see scripts/block-labels.js)
+// author label rows in the DA table; removed before rendering
 const LABELS = [
   'Section title',
   'Section description',
@@ -9,6 +8,16 @@ const LABELS = [
   'Colours applied (Name, Code, #HEX, URL)',
   'Image description',
 ];
+
+function removeLabelRows(block, labels) {
+  const norm = (t) => t.replace(/\s*\([^)]*\)\s*$/, '').replace(/\s+/g, ' ').trim().toLowerCase();
+  const known = new Set(labels.map(norm));
+  [...block.children].forEach((row) => {
+    if (row.querySelector('picture, img')) return;
+    const texts = [...row.children].map((cell) => cell.textContent.trim()).filter(Boolean);
+    if (texts.length && texts.every((t) => known.has(norm(t)))) row.remove();
+  });
+}
 
 const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 
@@ -28,18 +37,18 @@ function el(tag, className, text) {
 }
 
 function buildHeader(cells) {
-  const header = el('div', 'lookbookcarousel-header');
+  const header = el('div', 'lookbook-carousel-header');
   cells.forEach((cell, i) => {
     const heading = cell.querySelector('h1, h2, h3, h4, h5, h6');
     if (heading) {
-      heading.classList.add('lookbookcarousel-title');
+      heading.classList.add('lookbook-carousel-title');
       header.append(...cell.childNodes);
       return;
     }
-    const node = el(i === 0 ? 'h2' : 'p', i === 0 ? 'lookbookcarousel-title' : 'lookbookcarousel-desc', cell.textContent.trim());
+    const node = el(i === 0 ? 'h2' : 'p', i === 0 ? 'lookbook-carousel-title' : 'lookbook-carousel-desc', cell.textContent.trim());
     header.append(node);
   });
-  header.querySelectorAll(':scope > p:not([class])').forEach((p) => p.classList.add('lookbookcarousel-desc'));
+  header.querySelectorAll(':scope > p:not([class])').forEach((p) => p.classList.add('lookbook-carousel-desc'));
   return header.children.length ? header : null;
 }
 
@@ -85,18 +94,18 @@ function parseColour(li) {
 function buildColour({
   name, code, colour, url, swatch,
 }) {
-  const item = el('li', 'lookbookcarousel-colour');
-  const wrap = el(url ? 'a' : 'div', 'lookbookcarousel-colour-link');
+  const item = el('li', 'lookbook-carousel-colour');
+  const wrap = el(url ? 'a' : 'div', 'lookbook-carousel-colour-link');
   if (url) wrap.href = url;
 
-  const chip = el('span', 'lookbookcarousel-chip');
+  const chip = el('span', 'lookbook-carousel-chip');
   chip.setAttribute('aria-hidden', 'true');
   if (colour) chip.style.backgroundColor = colour;
   else if (swatch) chip.style.backgroundImage = `url("${swatch}")`;
   wrap.append(chip);
 
-  if (name) wrap.append(el('span', 'lookbookcarousel-colour-name', name));
-  if (code) wrap.append(el('span', 'lookbookcarousel-colour-code', code));
+  if (name) wrap.append(el('span', 'lookbook-carousel-colour-name', name));
+  if (code) wrap.append(el('span', 'lookbook-carousel-colour-code', code));
   item.append(wrap);
   return item;
 }
@@ -108,23 +117,23 @@ function buildSlide(row) {
   const descCell = cells.find((cell) => ![imageCell, coloursCell].includes(cell)
     && cell.textContent.trim());
 
-  const slide = el('li', 'lookbookcarousel-slide');
+  const slide = el('li', 'lookbook-carousel-slide');
 
   const picture = optimize(imageCell?.querySelector('picture'), [{ width: '1100' }]);
   if (picture) {
-    const media = el('div', 'lookbookcarousel-media');
+    const media = el('div', 'lookbook-carousel-media');
     media.append(picture);
     slide.append(media);
   }
 
   const desc = descCell?.textContent.trim();
-  if (desc) slide.append(el('p', 'lookbookcarousel-slide-desc', desc));
+  if (desc) slide.append(el('p', 'lookbook-carousel-slide-desc', desc));
 
   const items = [...(coloursCell?.querySelectorAll('li') || [])]
     .map(parseColour)
     .filter((c) => c.name || c.code || c.colour || c.swatch);
   if (items.length) {
-    const colours = el('ul', 'lookbookcarousel-colours');
+    const colours = el('ul', 'lookbook-carousel-colours');
     colours.setAttribute('aria-label', 'Colours applied');
     items.forEach((c) => colours.append(buildColour(c)));
     slide.append(colours);
@@ -212,9 +221,9 @@ function setupLoop(block, track, slides) {
 }
 
 function setupNav(block, track, slides) {
-  const nav = el('div', 'lookbookcarousel-nav');
-  const prev = el('button', 'lookbookcarousel-prev');
-  const next = el('button', 'lookbookcarousel-next');
+  const nav = el('div', 'lookbook-carousel-nav');
+  const prev = el('button', 'lookbook-carousel-prev');
+  const next = el('button', 'lookbook-carousel-next');
   prev.type = 'button';
   next.type = 'button';
   prev.setAttribute('aria-label', 'Previous slide');
@@ -228,7 +237,7 @@ function setupNav(block, track, slides) {
 }
 
 /**
- * lookbookcarousel – migrated from the AEM "lookbookcarousel" component
+ * lookbook-carousel – migrated from the AEM "lookbook-carousel" component
  * ("get inspired" variant): heading, description and a carousel of room
  * images, each with the colours applied (swatch, name, shade code, link).
  * Desktop (>= 992px): 521px slides, prev/next arrows at the top right.
@@ -239,13 +248,13 @@ function setupNav(block, track, slides) {
  * Label rows (the LABELS above, e.g. "Section title") may sit above any row
  * to guide authors; they are removed before rendering.
  *
- * | lookbookcarousel |                     |                         |
+ * | lookbook-carousel |                     |                         |
  * | ---------------- | ------------------- | ----------------------- |
  * | Title            | Description         |                         |
  * | Image            | Colours applied     | Image description       |
  * | ...one row per slide...                                          |
  *
- * - Row 1: block name only ("lookbookcarousel").
+ * - Row 1: block name only ("lookbook-carousel").
  * - Row 2 – Header (optional, no image):
  *   - Column 1 – Title, rendered as an h2, e.g. "Inspiring ideas for your
  *     home". AEM dialog: title
@@ -280,12 +289,12 @@ export default function decorate(block) {
     header = buildHeader([...rows.shift().children].filter((cell) => cell.textContent.trim()));
   }
 
-  const track = el('ul', 'lookbookcarousel-track');
-  track.setAttribute('aria-label', header?.querySelector('.lookbookcarousel-title')?.textContent.trim() || 'Inspiration');
+  const track = el('ul', 'lookbook-carousel-track');
+  track.setAttribute('aria-label', header?.querySelector('.lookbook-carousel-title')?.textContent.trim() || 'Inspiration');
   const slides = rows.map(buildSlide);
   track.append(...slides);
 
-  const viewport = el('div', 'lookbookcarousel-viewport');
+  const viewport = el('div', 'lookbook-carousel-viewport');
   viewport.append(track);
 
   block.replaceChildren(...(header ? [header] : []), viewport);
