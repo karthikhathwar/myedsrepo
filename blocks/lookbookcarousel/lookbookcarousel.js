@@ -1,4 +1,14 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
+import removeLabelRows from '../../scripts/block-labels.js';
+
+// author label rows in the DA table (see scripts/block-labels.js)
+const LABELS = [
+  'Section title',
+  'Section description',
+  'Room image',
+  'Colours applied (Name, Code, #HEX, URL)',
+  'Image description',
+];
 
 const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 
@@ -226,6 +236,8 @@ function setupNav(block, track, slides) {
  * Loops endlessly in both directions when the slides overflow.
  *
  * Authoring (DA table):
+ * Label rows (the LABELS above, e.g. "Section title") may sit above any row
+ * to guide authors; they are removed before rendering.
  *
  * | lookbookcarousel |                     |                         |
  * | ---------------- | ------------------- | ----------------------- |
@@ -260,6 +272,7 @@ function setupNav(block, track, slides) {
  * @param {Element} block
  */
 export default function decorate(block) {
+  removeLabelRows(block, LABELS);
   const rows = [...block.children].filter((row) => row.textContent.trim() || row.querySelector('picture'));
 
   let header;

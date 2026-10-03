@@ -1,4 +1,17 @@
+import removeLabelRows from '../../scripts/block-labels.js';
+
+// author label rows in the DA table (see scripts/block-labels.js)
+const LABELS = [
+  'Section title',
+  'Pack image',
+  'Pack size',
+  'Price',
+  'Tax note',
+  'Disclaimer',
+];
+
 export default function decorate(block) {
+  removeLabelRows(block, LABELS);
   const rows = [...block.children];
 
   if (rows.length < 3) return;

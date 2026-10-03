@@ -1,4 +1,16 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
+import removeLabelRows from '../../scripts/block-labels.js';
+
+// author label rows in the DA table (see scripts/block-labels.js)
+const LABELS = [
+  'Section title',
+  'Product image',
+  'Step label',
+  'Step type',
+  'Product name',
+  'Coats',
+  'Product URL',
+];
 
 const URL_TEXT = /^(https?:\/\/|\/)\S+$/i;
 
@@ -89,6 +101,8 @@ function buildStep(row, index) {
  * Mobile (< 768px): one step per row, image and text alternating sides.
  *
  * Authoring (DA table):
+ * Label rows (the LABELS above, e.g. "Section title") may sit above any row
+ * to guide authors; they are removed before rendering.
  *
  * | applicationprocess |        |        |               |        |              |
  * | ------------------ | ------ | ------ | ------------- | ------ | ------------ |
@@ -116,6 +130,7 @@ function buildStep(row, index) {
  * @param {Element} block
  */
 export default function decorate(block) {
+  removeLabelRows(block, LABELS);
   const rows = [...block.children].filter((row) => row.textContent.trim() || row.querySelector('picture'));
 
   let header;

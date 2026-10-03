@@ -1,4 +1,17 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
+import removeLabelRows from '../../scripts/block-labels.js';
+
+// author label rows in the DA table (see scripts/block-labels.js)
+const LABELS = [
+  'Section title',
+  'View all link',
+  'Product image',
+  'Product name',
+  'Subtitle',
+  'Description',
+  'Key features',
+  'Product link',
+];
 
 const DEFAULT_FEATURES_LABEL = 'Key features';
 const DEFAULT_CTA_LABEL = 'View product';
@@ -143,6 +156,8 @@ function setupNav(block, track) {
  * Cards scroll horizontally (3 per view desktop, 2 tablet, 1 + peek mobile).
  *
  * Authoring (DA table):
+ * Label rows (the LABELS above, e.g. "Section title") may sit above any row
+ * to guide authors; they are removed before rendering.
  *
  * | similarproducts |              |              |              |               |              |
  * | --------------- | ------------ | ------------ | ------------ | ------------- | ------------ |
@@ -181,6 +196,7 @@ function setupNav(block, track) {
  * @param {Element} block
  */
 export default function decorate(block) {
+  removeLabelRows(block, LABELS);
   const rows = [...block.children].filter((row) => row.textContent.trim() || row.querySelector('picture'));
 
   let header;

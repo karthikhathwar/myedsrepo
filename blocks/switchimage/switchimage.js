@@ -1,4 +1,14 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
+import removeLabelRows from '../../scripts/block-labels.js';
+
+// author label rows in the DA table (see scripts/block-labels.js)
+const LABELS = [
+  'Section title',
+  'Section description',
+  'Tab title',
+  'Desktop image',
+  'Mobile image',
+];
 
 const DESKTOP_MQ = window.matchMedia('(width >= 992px)');
 
@@ -42,6 +52,8 @@ function buildHeader(cells) {
  * Mobile/tablet (< 992px): accordion, the open item shows its image inline.
  *
  * Authoring (DA table):
+ * Label rows (the LABELS above, e.g. "Section title") may sit above any row
+ * to guide authors; they are removed before rendering.
  *
  * | switchimage                    |                    |                     |
  * | ------------------------------ | ------------------ | ------------------- |
@@ -71,6 +83,7 @@ function buildHeader(cells) {
  * @param {Element} block
  */
 export default function decorate(block) {
+  removeLabelRows(block, LABELS);
   const stage = document.createElement('div');
   stage.className = 'switchimage-stage';
 

@@ -1,4 +1,14 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
+import removeLabelRows from '../../scripts/block-labels.js';
+
+// author label rows in the DA table (see scripts/block-labels.js)
+const LABELS = [
+  'Section title',
+  'Card image',
+  'Card title',
+  'Description',
+  'CTA link',
+];
 
 function optimize(picture) {
   const img = picture?.querySelector('img');
@@ -77,6 +87,8 @@ function buildCard(row) {
  * Mobile/tablet (< 992px): cards stacked one below the other.
  *
  * Authoring (DA table):
+ * Label rows (the LABELS above, e.g. "Section title") may sit above any row
+ * to guide authors; they are removed before rendering.
  *
  * | titleimagedescription |             |             |           |
  * | --------------------- | ----------- | ----------- | --------- |
@@ -102,6 +114,7 @@ function buildCard(row) {
  * @param {Element} block
  */
 export default function decorate(block) {
+  removeLabelRows(block, LABELS);
   const rows = [...block.children].filter((row) => row.textContent.trim() || row.querySelector('picture'));
 
   let header;
