@@ -1,8 +1,36 @@
 // author label rows in the DA table; removed before rendering
 const LABELS = [
   'Section title',
+  'Tag label',
   'Tag link',
 ];
+
+const URL_TEXT = /^(https?:\/\/|\/)\S+$/i;
+
+// URL of a cell holding only a URL (a link whose text is the URL, or plain text)
+function urlOf(cell) {
+  const text = cell.textContent.trim();
+  if (!URL_TEXT.test(text)) return '';
+  const a = cell.querySelector('a');
+  return a ? a.href : new URL(text, window.location.href).href;
+}
+
+/**
+ * Tags in a row. Column layout: "Tag label | Tag link (URL)". Also accepts
+ * linked labels ("[Label](URL)"), one or several per row.
+ */
+function tagsOf(row) {
+  const cells = [...row.children];
+  const urlCell = cells.find(urlOf);
+  if (urlCell) {
+    const labelCell = cells.find((cell) => cell !== urlCell && cell.textContent.trim());
+    const label = labelCell?.textContent.trim();
+    return label ? [{ label, href: urlOf(urlCell) }] : [];
+  }
+  return [...row.querySelectorAll('a')]
+    .map((a) => ({ label: a.textContent.trim(), href: a.href, target: a.target }))
+    .filter((t) => t.label && t.href);
+}
 
 function removeLabelRows(block, labels) {
   const norm = (t) => t.replace(/\s*\([^)]*\)\s*$/, '').replace(/\s+/g, ' ').trim().toLowerCase();
@@ -28,23 +56,24 @@ function el(tag, className, text) {
  *
  * Authoring (DA table):
  *
- * | popular-tags                                |
- * | ------------------------------------------- |
- * | Section title                               |  <- label row (optional)
- * | Related Products                            |
- * | Tag link                                    |  <- label row (optional)
- * | [Apcolite All Protek Matte](https://…)      |
- * | [Interior Waterproofing Solutions](https://…) |
- * | ...one row per tag...                       |
+ * | popular-tags              |                      |
+ * | ------------------------- | -------------------- |
+ * | Section title             |                      |  <- label row (optional)
+ * | Related Products          |                      |
+ * | Tag label                 | Tag link             |  <- label row (optional)
+ * | Apcolite All Protek Matte | https://www.asian... |
+ * | ...one row per tag...     |                      |
  *
  * - Row 1: block name only ("popular-tags").
- * - Section title (optional): first row without a link, rendered as an h3,
+ * - Section title (optional): first row without a tag, rendered as an h3,
  *   e.g. "Related Products". AEM: Title component above the tags.
- * - Tag rows: one link per row; the link text is the tag label (shown in
- *   capitals) and the link URL is where it goes. A row may also hold several
- *   links (e.g. a bulleted list of links). AEM: popular tags (label + link).
- * - Label rows ("Section title", "Tag link") guide authors and are removed
- *   before rendering.
+ * - Tag rows (one per tag):
+ *   - Column 1 – Tag label: text shown on the tag (in capitals).
+ *   - Column 2 – Tag link: page the tag opens (URL as plain text or a link).
+ *   AEM: popular tags (label + link). A linked label ("[Label](URL)") in a
+ *   single cell also works, one or several per row.
+ * - Label rows ("Section title", "Tag label | Tag link") guide authors and
+ *   are removed before rendering.
  *
  * @param {Element} block
  */
@@ -53,7 +82,7 @@ export default function decorate(block) {
   const rows = [...block.children].filter((row) => row.textContent.trim());
 
   let title;
-  if (rows[0] && !rows[0].querySelector('a')) {
+  if (rows[0] && !tagsOf(rows[0]).length) {
     const cell = [...rows.shift().children].find((c) => c.textContent.trim());
     title = cell?.querySelector('h1, h2, h3, h4, h5, h6') || el('h3', '', cell?.textContent.trim());
     title.classList.add('popular-tags-title');
@@ -61,12 +90,10 @@ export default function decorate(block) {
 
   const list = el('ul', 'popular-tags-list');
   rows.forEach((row) => {
-    row.querySelectorAll('a').forEach((a) => {
-      const label = a.textContent.trim();
-      if (!label || !a.href) return;
+    tagsOf(row).forEach(({ label, href, target }) => {
       const link = el('a', 'popular-tags-link', label);
-      link.href = a.href;
-      if (a.target) link.target = a.target;
+      link.href = href;
+      if (target) link.target = target;
       const item = el('li', 'popular-tags-item');
       item.append(link);
       list.append(item);
