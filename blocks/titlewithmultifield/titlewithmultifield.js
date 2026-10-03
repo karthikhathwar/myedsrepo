@@ -6,19 +6,20 @@ export default function decorate(block) {
   const headingRow = rows.shift();
   const disclaimerRow = rows.pop();
 
-  const headingText = headingRow.children[0]?.textContent.trim() || '';
+  const headingText =
+    headingRow.children[0]?.textContent.trim() || '';
 
   const wrapper = document.createElement('div');
   wrapper.classList.add('pack-sizes');
 
   const heading = document.createElement('h2');
-  heading.classList.add('pack-sizes-heading');
+  heading.classList.add('pack-sizes__heading');
   heading.textContent = headingText;
 
   wrapper.appendChild(heading);
 
   const cardsContainer = document.createElement('div');
-  cardsContainer.classList.add('pack-sizes-cards');
+  cardsContainer.classList.add('pack-sizes__cards');
 
   rows.forEach((row) => {
     const cols = [...row.children];
@@ -29,7 +30,7 @@ export default function decorate(block) {
     const tax = cols[3]?.textContent.trim() || '';
 
     const card = document.createElement('div');
-    card.classList.add('pack-sizes-card');
+    card.classList.add('pack-sizes__card');
 
     if (size === '1 L') {
       card.classList.add('size-1');
@@ -42,24 +43,24 @@ export default function decorate(block) {
     }
 
     const imageWrapper = document.createElement('div');
-    imageWrapper.classList.add('pack-sizes-image');
+    imageWrapper.classList.add('pack-sizes__image');
 
     if (image) {
       imageWrapper.appendChild(image.cloneNode(true));
     }
 
     const sizeLabel = document.createElement('div');
-    sizeLabel.classList.add('pack-sizes-size');
+    sizeLabel.classList.add('pack-sizes__size');
     sizeLabel.textContent = size;
 
     imageWrapper.appendChild(sizeLabel);
 
     const priceEl = document.createElement('div');
-    priceEl.classList.add('pack-sizes-price');
+    priceEl.classList.add('pack-sizes__price');
     priceEl.textContent = price;
 
     const taxEl = document.createElement('div');
-    taxEl.classList.add('pack-sizes-tax');
+    taxEl.classList.add('pack-sizes__tax');
     taxEl.textContent = tax;
 
     card.append(
@@ -74,17 +75,9 @@ export default function decorate(block) {
   wrapper.appendChild(cardsContainer);
 
   const note = document.createElement('div');
-  note.classList.add('pack-sizes-note');
-  const noteText = disclaimerRow.children[0]?.textContent.trim() || '';
-  // only the leading asterisk is red (::first-letter would also colour the "P")
-  if (noteText.startsWith('*')) {
-    const asterisk = document.createElement('span');
-    asterisk.classList.add('pack-sizes-asterisk');
-    asterisk.textContent = '*';
-    note.append(asterisk, noteText.slice(1));
-  } else {
-    note.textContent = noteText;
-  }
+  note.classList.add('pack-sizes__note');
+  note.textContent =
+    disclaimerRow.children[0]?.textContent.trim() || '';
 
   wrapper.appendChild(note);
 
